@@ -1,0 +1,53 @@
+﻿@using BlazorTestTodo.Shared
+
+<EditForm Model="todo" OnValidSubmit="@TodoOnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group row">
+        <label for="todoId" class="col-sm-2 col-form-label">Id</label>
+        <div class="col-sm-6">
+            <Input type="text" id="todoId" bind="@todo.Id" class="form-control" disabled />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="todoTitle" class="col-sm-2 col-form-label">Title</label>
+        <div class="col-sm-6">
+            <InputText id="todoTitle" bind-Value="@todo.Title" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="todoShortDesc" class="col-sm-2 col-form-label">Short Description</label>
+        <div class="col-sm-6">
+            <InputText id="todoShortDesc" bind-Value="@todo.ShortDesc" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="todoPriorityNumber" class="col-sm-2 col-form-label">Priority Number</label>
+        <div class="col-sm-6">
+            <InputNumber id="todoPriorityNumber" bind-Value="@todo.PriorityNumber" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-8">
+            <div class="form-check">
+                <InputCheckbox id="todoIsDone" bind-Value="@todo.IsDone" class="form-check-input" />
+                <label for="todoIsDone" class="form-check-label">Is Done</label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-8">
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="button" class="btn btn-primary" onclick="@CancelForm">Cancel</button>
+        </div>
+    </div>
+</EditForm>
+
+@functions {
+    [Parameter]
+    private TodoItem todo { get; set; }
+    [Parameter]
+    private EventCallback<EditContext> TodoOnValidSubmit { get; set; }
+    [Parameter]
+    private EventCallback CancelForm { get; set; }
+}

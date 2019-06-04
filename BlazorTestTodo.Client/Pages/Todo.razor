@@ -1,0 +1,121 @@
+﻿@page  "/todo"
+@inject HttpClient  Http
+@using BlazorTestTodo.Shared
+
+<h1>Todo List</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th>Short Description</th>
+            <th>Priority Number</th>
+            <th>Is Done</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (TodoItem todo in todos)
+        {
+            if (todo.Id == editTodo.Id)
+            {
+                <tr>
+                    <td colspan="6">
+                        <TodoEdit todo="@editTodo" TodoOnValidSubmit="@UpdateTodo" CancelForm="@CancelUpdateTodo" />
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td>@todo.Id</td>
+                    <td>@todo.Title</td>
+                    <td>@todo.ShortDesc</td>
+                    <td>@todo.PriorityNumber</td>
+                    <td>@todo.IsDone</td>
+                    <td>
+                        <button onclick="@(() => EditTodo(todo))" class="btn btn-primary">Edit</button>
+                        <button onclick="@(() => DeleteTodo(todo))" class="btn btn-primary">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+
+    </tbody>
+</table>
+
+<h3>Add New Todo Item</h3>
+<TodoEdit todo="@newTodo" TodoOnValidSubmit="@AddTodo" CancelForm="@ResetNewTodo" />
+
+<h3>Todo Data</h3>
+
+<ul>
+    @foreach (TodoItem todo in todos)
+    {
+        <li>@todo.Id, @todo.Title, @todo.ShortDesc, @todo.PriorityNumber, @todo.IsDone</li>
+    }
+</ul>
+
+@functions {
+    private List<TodoItem> todos = new List<TodoItem>();
+    private TodoItem newTodo = new TodoItem();
+    private TodoItem editTodo = new TodoItem() { Id = 0 };
+
+    protected override async Task OnInitAsync()
+    {
+        await GetTodos();
+    }
+
+    private async Task GetTodos()
+    {
+        todos = await Http.GetJsonAsync<List<TodoItem>>("api/tododata");
+    }
+
+    private async Task DeleteTodo(TodoItem todoItem)
+    {
+        await Http.DeleteAsync($"api/tododata/{todoItem.Id}");
+        await GetTodos();
+    }
+
+    private async Task AddTodo(EditContext ctx)
+    {
+        await Http.PostJsonAsync("api/tododata", newTodo);
+        await GetTodos();
+        newTodo = new TodoItem();
+    }
+
+    private void ResetNewTodo()
+    {
+        newTodo = new TodoItem();
+    }
+
+    private void EditTodo(TodoItem item)
+    {
+        editTodo = new TodoItem();
+        editTodo.Id = item.Id;
+        editTodo.Title = item.Title;
+        editTodo.ShortDesc = item.ShortDesc;
+        editTodo.PriorityNumber = item.PriorityNumber;
+        editTodo.IsDone = item.IsDone;
+    }
+
+    private async Task UpdateTodo(EditContext ctx)
+    {
+        OutputTodo("Edit form submitted value: ", editTodo);
+
+        await Http.PutJsonAsync("api/tododata", editTodo);
+        await GetTodos();
+        editTodo = new TodoItem();
+    }
+
+    private void CancelUpdateTodo()
+    {
+        editTodo = new TodoItem();
+    }
+
+    private void OutputTodo(string title, TodoItem item)
+    {
+        Console.WriteLine($"{title}: {item.Id}, {item.Title}, {item.ShortDesc}, {item.PriorityNumber}, {item.IsDone}");
+    }
+}
